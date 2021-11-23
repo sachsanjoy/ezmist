@@ -389,3 +389,178 @@ def get_t_isochrones(logt0, logt1, dlogt, age_scale='log10', ret_table=True, **k
         return _read_mist_iso_filecontent(r)
     else:
         return r
+
+#        Download grid MIST
+#--------------------------------
+# only for python3
+#--------------------------------
+def grid_query_website(q):
+    """ Run the query on the website
+
+    Parameters
+    ----------
+    q: str
+        string of arguments (joined by `&` char)
+
+    Returns
+    -------
+    r: str or bytes
+       passes the downloaded Filename
+    """
+
+    url = _cfg["request_url"]
+    print('Interrogating {0}...'.format(url))
+
+    print('Request...', end='')
+    if py3k:
+        req = request.Request(url, q.encode('utf8'))
+        print('done.')
+        print("Reading content...", end='')
+        c = urlopen(req).read().decode('utf8')
+    else:
+        c = urlopen(url, q).read()
+
+    try:
+        fname = re.compile('<a href=".*">').findall(c)[0][9:-2]
+    except Exception as e:
+        print(e)
+        raise RuntimeError("Something went wrong")
+
+    furl = _cfg['download_url'] + fname
+
+    print('Downloading data from MIST...{0}...'.format(furl), end='')
+    if py3k:
+        import requests
+        rurl = requests.get(furl, allow_redirects=True)
+        open(fname[4:], 'wb').write(rurl.content)
+        print(fname[4:], ' File downloaded!')
+        dwfname = fname[4:]
+        return dwfname
+
+def get_age_isochrones(logt0, logt1, dlogt, age_scale='log10', ret_table=True, **kwargs):
+    """ get a sequence of isochrones at constant Z
+
+    Parameters
+    ----------
+    logt0: float
+        minimal value of log(t/yr)
+
+    logt1: float
+        maximal value of log(t/yr)
+
+    dlogt: float
+        step in log(t/yr) for the sequence
+
+    ret_table: bool
+        if set, return a eztable.Table object of the data
+
+    Returns
+    -------
+    r: Table or str
+        return the downloaded filename
+    """
+    opts = simple_options(
+        age_type='range',
+        age_range_low=logt0,
+        age_range_high=logt1,
+        age_range_delta=dlogt,
+        age_scale=age_scale,
+        **kwargs)
+
+    d = _get_url_args(**opts)
+    dwfname = grid_query_website(d)
+    return dwfname
+
+def extractallfn(zip_name,feh,av,vc):
+    """ Extract the zipfile to make the grid and rename the files based on the parameters
+
+    Parameters
+    ----------
+    zip_name: str
+        name of the zipfile
+
+    feh: float
+        metalicity Fe/H
+
+    av: float
+        Av
+
+    vc: str
+        vvcritic
+    """
+
+    from zipfile import ZipFile
+    import numpy as np
+    print(zip_name)
+    # Create a ZipFile Object and load sample.zip in it
+    with ZipFile(zip_name, 'r') as zipObj:
+        # Extract all the contents of zip file in different directory
+        zipObj.extractall('.')
+        print('mv '+zip_name[:-3]+'cmd '+'MIST_iso_feh'+str('%.2f'%feh)+'_av'+str('%.2f'%av)+'_'+vc+'.iso.cmd')
+    os.system('mv '+zip_name[:-3]+'cmd '+'MIST_iso_feh'+str('%.2f'%feh)+'_av'+str('%.2f'%av)+'_'+vc+'.iso.cmd')
+    os.system('rm -f '+zip_name)
+
+def get_grid_isochrone(age_min,age_max,delta_age,feh_min,feh_max,delta_feh,av_min,av_max,delta_av,age_scale = 'log10',vc = 'vvcrit0.0',output_option = 'photometry',output = 'UBVRIplus',nprounds=3):
+    """ get a grid of isochrones at varying age, FeH and Av
+
+    Parameters
+    ----------
+    age_min: float
+        minimal value of log(t/yr)
+
+    age_max: float
+        maximal value of log(t/yr)
+
+    delta_age: float
+        step in log(t/yr) for the sequence
+
+    feh_min: float
+        minimal value of metalicity
+
+    feh_max: float
+        maximal value of metalicity
+
+    delta_feh: float
+        step in feh for the sequence
+
+    av_min: float
+        minimal value of Av
+
+    av_max: float
+        maximal value of Av
+
+    delta_Av: float
+        step in Av for the sequence
+
+    age_scale: str
+        scaling fn of age
+    
+    vc : str
+        critical velocity
+    
+    output_option: str
+        default is 'photometry'
+    
+    output: str
+       default is 'UBVRIplus'    
+
+    nprounds: int  
+        step precision default is 3
+    """
+
+    import numpy as np
+    grid_age = np.round(np.arange(age_min,age_max,delta_age),nprounds) #age grid
+    grid_FeH = np.round(np.arange(feh_min,feh_max,delta_feh),nprounds)  #metalicity grid
+    grid_Av = np.round(np.arange(av_min,av_max,delta_av),nprounds)   #extintion grid
+    
+    print('Total number of grids to download : ', len(grid_Av)*len(grid_FeH))
+    print('Total number of models to download : ', len(grid_Av)*len(grid_FeH)*len(grid_age))
+    print(grid_Av.tolist())
+    print(grid_FeH.tolist())
+    print(grid_age.tolist())
+    # grid loop
+    for i in grid_Av: #fe
+        for j in grid_FeH: #av
+            dfname = get_age_isochrones(age_min, age_max, delta_age, age_scale = age_scale, ret_table=False,output_option=output_option,output=output,FeH_value=j, Av_value=i,v_div_vcrit=vc)
+            extractallfn(dfname,j,i,vc)
+            print('Current parameters FeH, Av : ', j , i)
