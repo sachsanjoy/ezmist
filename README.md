@@ -58,6 +58,8 @@ EXAMPLE USAGE
                 age_scale = age_scale,vc = 'vvcrit0.0',
                 output_option=output_option,output=output,nprounds=nprounds)
 
+```
+
 * Basic example of downloading a sequence of isochrones, plotting, saving
 ```python
 >>> r = ezmist.get_t_isochrones(6.0, 7.0, 0.05, FeH_value=0.0, theory_output='full')
