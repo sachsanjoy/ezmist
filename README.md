@@ -33,6 +33,30 @@ download the repository and run the setup
 
 EXAMPLE USAGE
 -------------
+* Example for downloading isochrone grid  in Age, FeH and Av ranges.
+```python3
+>>> import ezmist
+>>> age_min = 9.8
+>>> age_max = 10.31
+>>> delta_age = 0.01
+
+>>> feh_min = 0.25
+>>> feh_max = 0.46
+>>> delta_feh = 0.01
+
+>>> av_min = 0
+>>> av_max = 1.05
+>>> delta_av = 0.05
+
+>>> age_scale = 'log10'
+>>> vc = 'vvcrit0.0'
+>>> ouput_option ='photometry'
+>>> output = 'UBVRIplus'
+>>> nprounds = 3
+
+>>> ezmist.get_grid_isochrone(age_min, age_max, delta_age, feh_min, feh_max, delta_feh, av_min, av_max, delta_av,
+                age_scale = age_scale,vc = 'vvcrit0.0',
+                output_option=output_option,output=output,nprounds=nprounds)
 
 * Basic example of downloading a sequence of isochrones, plotting, saving
 ```python
