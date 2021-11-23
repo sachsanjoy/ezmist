@@ -52,11 +52,11 @@ EXAMPLE USAGE
 >>> vc = 'vvcrit0.0'
 >>> ouput_option ='photometry'
 >>> output = 'UBVRIplus'
->>> nprounds = 3
+>>> nprounds = 3 #precision default is 3.
 
 >>> ezmist.get_grid_isochrone(age_min, age_max, delta_age, feh_min, feh_max, delta_feh, av_min, av_max, delta_av,
-                age_scale = age_scale,vc = 'vvcrit0.0',
-                output_option=output_option,output=output,nprounds=nprounds)
+                age_scale = age_scale,vc = vc,
+                output_option=output_option, output=output, nprounds=nprounds)
 
 ```
 
