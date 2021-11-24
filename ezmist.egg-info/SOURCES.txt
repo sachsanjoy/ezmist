@@ -1,0 +1,10 @@
+README.md
+setup.py
+ezmist/__init__.py
+ezmist/ezmist.py
+ezmist/simpletable.py
+ezmist.egg-info/PKG-INFO
+ezmist.egg-info/SOURCES.txt
+ezmist.egg-info/dependency_links.txt
+ezmist.egg-info/not-zip-safe
+ezmist.egg-info/top_level.txt

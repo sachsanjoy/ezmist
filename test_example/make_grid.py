@@ -1,6 +1,6 @@
 import ezmist
 age_min = 9.8
-age_max = 10.0
+age_max = 10.30
 delta_age = 0.01
 
 feh_min = 0.25
