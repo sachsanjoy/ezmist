@@ -394,6 +394,47 @@ def get_t_isochrones(logt0, logt1, dlogt, age_scale='log10', ret_table=True, **k
 #--------------------------------
 # only for python3
 #--------------------------------
+def get_age_isochrones(logt0, logt1, dlogt, age_scale='log10', **kwargs):
+    """ get a sequence of isochrones at constant Z
+
+    Parameters
+    ----------
+    logt0: float
+        minimal value of log(t/yr)
+
+    logt1: float
+        maximal value of log(t/yr)
+
+    dlogt: float
+        step in log(t/yr) for the sequence
+
+    ret_table: bool
+        if set, return a eztable.Table object of the data
+
+    Returns
+    -------
+    r: Table or str
+        if ret_table is set, return a eztable.Table object of the data
+        else return the string content of the data
+    """
+    opts = simple_options(
+        age_type='range',
+        age_range_low=logt0,
+        age_range_high=logt1,
+        age_range_delta=dlogt,
+        age_scale=age_scale,
+        **kwargs)
+
+    d = _get_url_args(**opts)
+
+    dwfname = grid_query_website(d)
+    return dwfname
+    #if ret_table is True:
+    #    return _read_mist_iso_filecontent(r)
+    #else:
+    #    return r
+
+
 def grid_query_website(q):
     """ Run the query on the website
 
@@ -437,40 +478,6 @@ def grid_query_website(q):
         dwfname = fname[4:]
         return dwfname
 
-def get_age_isochrones(logt0, logt1, dlogt, age_scale='log10', ret_table=True, **kwargs):
-    """ get a sequence of isochrones at constant Z
-
-    Parameters
-    ----------
-    logt0: float
-        minimal value of log(t/yr)
-
-    logt1: float
-        maximal value of log(t/yr)
-
-    dlogt: float
-        step in log(t/yr) for the sequence
-
-    ret_table: bool
-        if set, return a eztable.Table object of the data
-
-    Returns
-    -------
-    r: Table or str
-        return the downloaded filename
-    """
-    opts = simple_options(
-        age_type='range',
-        age_range_low=logt0,
-        age_range_high=logt1,
-        age_range_delta=dlogt,
-        age_scale=age_scale,
-        **kwargs)
-
-    d = _get_url_args(**opts)
-    dwfname = grid_query_website(d)
-    return dwfname
-
 def extractallfn(zip_name,feh,av,vc):
     """ Extract the zipfile to make the grid and rename the files based on the parameters
 
@@ -500,7 +507,7 @@ def extractallfn(zip_name,feh,av,vc):
     os.system('mv '+zip_name[:-3]+'cmd '+'MIST_iso_feh'+str('%.2f'%feh)+'_av'+str('%.2f'%av)+'_'+vc+'.iso.cmd')
     os.system('rm -f '+zip_name)
 
-def get_grid_isochrone(age_min,age_max,delta_age,feh_min,feh_max,delta_feh,av_min,av_max,delta_av,age_scale = 'log10',vc = 'vvcrit0.0',output_option = 'photometry',output = 'UBVRIplus',nprounds=3):
+def get_grid_isochrones(age_min,age_max,delta_age,feh_min,feh_max,delta_feh,av_min,av_max,delta_av,grid_age_scale='log10',grid_output_option='photometry', grid_output='UBVRIplus', grid_vvcrit='vvcrit0.0',nprounds=3):
     """ get a grid of isochrones at varying age, FeH and Av
 
     Parameters
@@ -561,6 +568,7 @@ def get_grid_isochrone(age_min,age_max,delta_age,feh_min,feh_max,delta_feh,av_mi
     # grid loop
     for i in grid_Av: #fe
         for j in grid_FeH: #av
-            dfname = get_age_isochrones(age_min, age_max, delta_age, age_scale = age_scale, ret_table=False,output_option=output_option,output=output,FeH_value=j, Av_value=i,v_div_vcrit=vc)
-            extractallfn(dfname,j,i,vc)
+            #dfname = get_age_isochrones(age_min, age_max, delta_age, age_scale = age_scale, ret_table=False,output_option=output_option,output=output,FeH_value=j, Av_value=i,v_div_vcrit=vc)
+            dfname = get_age_isochrones(age_min, age_max, delta_age, age_scale = grid_age_scale, output_option=grid_output_option, output=grid_output, FeH_value=j, Av_value=i, v_div_vcrit=grid_vvcrit)
+            extractallfn(dfname,j,i,grid_vvcrit)
             print('Current parameters FeH, Av : ', j , i)
