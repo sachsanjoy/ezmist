@@ -17,5 +17,5 @@ delta_av = 0.05
 #grid_vvcrit => ['vvcrit0.0','vvcrit0.4']
 
 ezmist.get_grid_isochrones(age_min, age_max, delta_age, feh_min, feh_max, delta_feh, av_min, av_max, delta_av,
-                            grid_age_scale='log10',grid_output_option='photometry', grid_output='UBVRIplus', grid_vvcrit='vvcrit0.4',nprounds=3)
+                            grid_age_scale='log10',grid_output_option='photometry', grid_output='UBVRIplus', grid_vvcrit='vvcrit0.0',nprounds=3)
 
